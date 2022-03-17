@@ -1,4 +1,5 @@
 const express = require ('express')
+const req = require('express/lib/request')
 
 const productosRouter = express.Router ()
 
@@ -77,9 +78,50 @@ class Contenedor {
                         const producto = await items.getByID (ID)
                         const index = products.indexOf(producto)
                         productos.splice (index, 1)
+                 return resultado
+            }
+        } catch (error) {
+            console.error(`Error: ${error}`);
+        }
+    }
 
-                return resultado
+    async putByID(ID, newPrice) {
+        try {
+            let products = await items.getAll()
+            //console.log(products)
+            const encontrado = products.filter ((item) => item.id == ID);
+            //console.log(encontrado)
+            if (encontrado.length === 0) { 
+                console.log('el producto no existe')
+            }else{
+                const respuesta = {}
+                //console.log(respuesta)
+                respuesta.anterior = encontrado
+                //console.log(respuesta.anterior)
                 
+                //const indexElem = encontrado.findIndex(elem => elem === "price")
+                //console.log (indexElem)
+                let newProp = newPrice['price']
+                //console.log(newProp)
+
+                respuesta.actualizada = newPrice
+                //console.log(respuesta.actualizada)
+
+                const producto = await items.getByID (ID)
+                const indexObjeto = products.indexOf(producto)
+                productos.splice(indexObjeto, 1, newPrice)
+                return respuesta
+
+
+
+
+                /*const resultado = productos.filter ((item) => item.id !== ID)
+                       // console.log('producto eliminado')
+                        const producto = await items.getByID (ID)
+                        const index = products.indexOf(producto)
+                        productos.splice (index, 1)
+                 return resultado
+                 */
             }
         } catch (error) {
             console.error(`Error: ${error}`);
@@ -102,6 +144,7 @@ const items = new Contenedor ('productos.json');
 
 
 //---------------------------------------------------------creacion de las rutas--------------------------------------------------------------------------
+
 productosRouter.get ('/', async (req, res)=>{
     let products = await items.getAll()
     res.json(products)
@@ -122,10 +165,12 @@ productosRouter.post('/', async (req, res)=>{
 })
 
 productosRouter.put ('/:ID', async (req, res)=>{
-    number = JSON.parse(req.params.ID)
+    //console.log(req.body)
+    let newPrice = req.body
+    //number = JSON.parse(req.params.ID)
     //console.log(number)
-    let product = await items.getByID(number)
-    res.json(product)
+    let putProduct = await items.putByID(req.params.ID, newPrice)
+    res.json(putProduct)
 })
 
 productosRouter.delete ("/:ID", async (req, res)=>{
